@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '123456790'
 
 # Create models
-conn = pymongo.Connection()
+conn = pymongo.MongoClient()
 db = conn.test
 
 
@@ -74,7 +74,7 @@ class TweetView(ModelView):
 
         # Grab user names
         query = {'_id': {'$in': [x['user_id'] for x in data]}}
-        users = db.user.find(query, fields=('name',))
+        users = db.user.find(query, {'name':  1})
 
         # Contribute user names to the models
         users_map = dict((x['_id'], x['name']) for x in users)
@@ -90,8 +90,8 @@ class TweetView(ModelView):
         form.user_id.choices = [(str(x['_id']), x['name']) for x in users]
         return form
 
-    def create_form(self):
-        form = super(TweetView, self).create_form()
+    def create_form(self, obj=None):
+        form = super(TweetView, self).create_form(obj=obj)
         return self._feed_user_choices(form)
 
     def edit_form(self, obj):
